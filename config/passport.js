@@ -3,6 +3,7 @@ var LocalStrategy   = require('passport-local').Strategy;
 var FacebookStrategy = require('passport-facebook').Strategy;
 var TwitterStrategy  = require('passport-twitter').Strategy;
 var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
+var GoogleTokenStrategy = require('passport-google-id-token');
 
 // load up the user model
 var User            = require('../app/models/user');
@@ -228,6 +229,21 @@ module.exports = function(passport) {
         });
 
     }));
+
+
+
+    // =========================================================================
+    // GOOGLE TOKEN ID ==================================================================
+    // =========================================================================
+    passport.use(new GoogleTokenStrategy({
+        clientID: "844062822101-c6f68972dkft9mbk01q3mvbnhl8ieu27.apps.googleusercontent.com"
+    },
+    function(parsedToken, googleId, done) {
+        User.findOrCreate({ googleId: googleId }, function (err, user) {
+        return done(err, user);
+        });
+    }
+    ));
 
 
     // =========================================================================

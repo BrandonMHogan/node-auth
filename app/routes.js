@@ -80,6 +80,12 @@ module.exports = function(app, passport) {
         }));
 
 
+    app.post('/auth/google/token', passport.authenticate('google-id-token'), function (req, res) {
+        // do something with req.user 
+        res.send(req.user? 200 : 401);
+        }
+    );
+
     // =====================================
     // GOOGLE ROUTES =======================
     // =====================================
@@ -103,7 +109,17 @@ module.exports = function(app, passport) {
         req.logout();
         res.redirect('/');
     });
+
+
+    app.post('/test', function(req, res) {
+        console.log("Endpoint triggered /test")
+        res.status(200);
+        res.json(req.body);
+    });
+
+
 };
+
 
 // route middleware to make sure a user is logged in
 function isLoggedIn(req, res, next) {
