@@ -236,12 +236,62 @@ module.exports = function(passport) {
     // GOOGLE TOKEN ID ==================================================================
     // =========================================================================
     passport.use(new GoogleTokenStrategy({
-        clientID: "844062822101-c6f68972dkft9mbk01q3mvbnhl8ieu27.apps.googleusercontent.com"
+        clientID        : configAuth.googleAuth.clientID,
+        clientSecret    : configAuth.googleAuth.clientSecret,
+        callbackURL     : configAuth.googleAuth.callbackURL
     },
-    function(parsedToken, googleId, done) {
-        User.findOrCreate({ googleId: googleId }, function (err, user) {
-        return done(err, user);
+    function(token, googleId, done) {
+        console.log("GoogleTokenStrategy triggered")
+
+
+        // make the code asynchronous
+        // User.findOne won't fire until we have all our data back from Google
+        process.nextTick(function() {
+
+            console.log("nextTick")
+            // try to find the user based on their google id
+            User.findOne({ 'google.id' : googleId }, function(err, user) {
+                
+                console.log("findOne")
+                if (err) {
+                    console.log("found error")
+                    return done(err);
+                }
+
+                if (user) {
+                    
+                    console.log("user exists")
+                    // if a user is found, log them in
+                    return done(null, user);
+                } else {
+                    console.log("user does not exist")
+                    // if the user isnt in our database, create a new user
+                    var newUser          = new User();
+
+                    console.log(googleId)
+                    console.log(token)
+                    // set all of the relevant information
+                    newUser.google.id    = googleId;
+                    newUser.google.token = token;
+                    newUser.google.name  = "No Name";
+                    newUser.google.email = "email@email.com"; // pull the first email
+
+                    // save the user
+                    newUser.save(function(err) {
+                        if (err)
+                            throw err;
+                        return done(null, newUser);
+                    });
+                }
+            });
         });
+
+
+
+
+        // User.findOrCreate({ googleId: googleId }, function (err, user) {
+        // return done(err, user);
+        // });
     }
     ));
 
@@ -253,7 +303,7 @@ module.exports = function(passport) {
 
         clientID        : configAuth.googleAuth.clientID,
         clientSecret    : configAuth.googleAuth.clientSecret,
-        callbackURL     : configAuth.googleAuth.callbackURL,
+        callbackURL     : configAuth.googleAuth.callbackURL
 
     },
     function(token, refreshToken, profile, done) {

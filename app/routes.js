@@ -80,9 +80,13 @@ module.exports = function(app, passport) {
         }));
 
 
-    app.post('/auth/google/token', passport.authenticate('google-id-token'), function (req, res) {
-        // do something with req.user 
-        res.send(req.user? 200 : 401);
+    app.post('/auth/google/token', 
+        passport.authenticate('google-id-token'), 
+        function (req, res) {
+            // do something with req.user 
+            console.log("Endpoint triggered /auth/google/token")
+            //console.log(req.user)
+            res.send(req.user? 200 : 401);
         }
     );
 
@@ -99,6 +103,8 @@ module.exports = function(app, passport) {
             passport.authenticate('google', {
                     successRedirect : '/profile',
                     failureRedirect : '/'
+            }, function(req, res) {
+                console.log("Endpoint triggered /auth/google/callback")
             }));
 
 
