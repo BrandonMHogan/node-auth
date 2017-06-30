@@ -86,7 +86,9 @@ module.exports = function(app, passport) {
             // do something with req.user 
             console.log("Endpoint triggered /auth/google/token")
             //console.log(req.user)
-            res.send(req.user? 200 : 401);
+
+            res.status(req.user? 200 : 401);
+            res.json('{"value": 1}');
         }
     );
 
@@ -117,7 +119,7 @@ module.exports = function(app, passport) {
     });
 
 
-    app.post('/test', function(req, res) {
+    app.post('/test', isLoggedIn, function(req, res) {
         console.log("Endpoint triggered /test")
         res.status(200);
         res.json(req.body);
@@ -134,6 +136,9 @@ function isLoggedIn(req, res, next) {
     if (req.isAuthenticated()) {
         console.log('User is authenticated');
         return next();
+    }
+    else {
+        console.log('User is not authenticated');
     }
 
     // if they aren't redirect them to the home page
